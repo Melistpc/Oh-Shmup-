@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -29,12 +30,7 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
     /// this constructor is to support automated grading
     /// </summary>
     /// <param name="gameObject">the game object the script is attached to</param>
-   /* public ObjectPool(GameObject gameObject) :
-        base(gameObject)
-    {
-        EventManager.AddBulletCreatedInvoker(this);
-        EventManager.AddEnemyCreatedInvoker(this);
-    }*/
+   
 
     #endregion
 
@@ -79,16 +75,18 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
     /// <returns>bullet</returns>
     public static GameObject GetBullet()
     {
-        // replace code below with correct code
-        if (pools.Count > 0)
+        List<GameObject> bulletPool = pools[PooledObjectName.Bullet];
+
+        if (bulletPool.Count > 0)
         {
-            prefabBullet = pools[PooledObjectName.Bullet][pools.Count - 1];
-            pools[PooledObjectName.Bullet].RemoveAt(pools.Count - 1);
+            prefabBullet = bulletPool[bulletPool.Count - 1];
+            bulletPool.RemoveAt(bulletPool.Count - 1);
             return prefabBullet;
         }
         else
         {
-            pools[PooledObjectName.Bullet].Capacity++;
+            
+            bulletPool.Capacity *= 2;
             return GetNewObject(PooledObjectName.Bullet);
         }
     }
@@ -100,19 +98,20 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
     public static GameObject GetEnemy()
     {
         // replace code below with correct code
-
-        if (pools.Count > 0)
+        List<GameObject> enemypool=pools[PooledObjectName.Enemy];
+        if (enemypool.Count > 0)
         {
-            prefabEnemy = pools[PooledObjectName.Enemy][pools.Count - 1];
-            pools[PooledObjectName.Enemy].RemoveAt(pools.Count - 1);
+            prefabEnemy = enemypool[enemypool.Count - 1];
+            enemypool.RemoveAt(pools[PooledObjectName.Enemy].Count - 1);
             return prefabEnemy;
         }
         else
         {
-            pools[PooledObjectName.Enemy].Capacity++;
+           enemypool.Capacity *= 2;
             return GetNewObject(PooledObjectName.Enemy);
         }
     }
+
 
     /// <summary>
     /// Gets a pooled object from the pool
@@ -124,7 +123,7 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
         List<GameObject> pool = pools[name];
 
         // check for available object in pool
-        if (pool.Count > 0)
+        if (pool.Count < pool.Capacity && pool.Count > 0)
         {
             GameObject obj = pool[pool.Count - 1];
             pool.RemoveAt(pool.Count - 1);
@@ -133,9 +132,13 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
         }
         else
         {
-            pools[name].Capacity++;
+            Console.WriteLine("Before expand"+pool.Capacity);
+            //pool.Capacity = pools[name].Capacity * 2;
+            pool.Capacity *= 2;
+            Console.WriteLine("After expand" + pool.Capacity);
             return GetNewObject(name);
-            // pool empty, so expand pool and return new object (replace code below)
+          
+           // pool empty, so expand pool and return new object (replace code below)
         }
     }
 

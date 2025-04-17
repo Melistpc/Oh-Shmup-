@@ -59,7 +59,7 @@ public class Enemy : MonoBehaviour
         // set force vector
         // Caution: you MUST use the enemy impulse force from
         // GameConstants
-        shootTimer = FindObjectOfType<Timer>();
+        shootTimer = new Timer();
        
         // set up shoot timer
 
