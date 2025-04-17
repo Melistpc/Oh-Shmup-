@@ -53,11 +53,14 @@ public class Enemy : MonoBehaviour
     public void Initialize()
     {       
         // save Rigidbody2D for efficiency
-
+      rb2d = GetComponent<Rigidbody2D>();
+      forceVector = ForceVector;
+ 
         // set force vector
         // Caution: you MUST use the enemy impulse force from
         // GameConstants
-
+        shootTimer = FindObjectOfType<Timer>();
+       
         // set up shoot timer
 
     }

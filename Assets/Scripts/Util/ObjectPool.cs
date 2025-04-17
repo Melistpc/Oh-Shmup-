@@ -29,12 +29,12 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
     /// this constructor is to support automated grading
     /// </summary>
     /// <param name="gameObject">the game object the script is attached to</param>
-    //public ObjectPool(GameObject gameObject) :
-    //    base(gameObject)
-    //{
-    //    EventManager.AddBulletCreatedInvoker(this);
-    //    EventManager.AddEnemyCreatedInvoker(this);
-    //}
+   /* public ObjectPool(GameObject gameObject) :
+        base(gameObject)
+    {
+        EventManager.AddBulletCreatedInvoker(this);
+        EventManager.AddEnemyCreatedInvoker(this);
+    }*/
 
     #endregion
 
@@ -56,9 +56,21 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
             new List<GameObject>(GameConstants.InitialEnemyPoolCapacity));
 
         // fill bullet pool
+     
+        for (int i = 0; i < GameConstants.InitialEnemyPoolCapacity; i++)
+        {
+            GameObject enemy = GetNewObject(PooledObjectName.Enemy);
+            pools[PooledObjectName.Enemy].Add(enemy);
+        }
+
+        for (int i = 0; i < GameConstants.InitialBulletPoolCapacity; i++)
+        {
+            GameObject bullet = GetNewObject(PooledObjectName.Bullet);
+            pools[PooledObjectName.Bullet].Add(bullet);
+        }
+
 
         // fill enemy pool
-
     }
 
     /// <summary>
@@ -68,7 +80,17 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
     public static GameObject GetBullet()
     {
         // replace code below with correct code
-        return null;
+        if (pools.Count > 0)
+        {
+            prefabBullet = pools[PooledObjectName.Bullet][pools.Count - 1];
+            pools[PooledObjectName.Bullet].RemoveAt(pools.Count - 1);
+            return prefabBullet;
+        }
+        else
+        {
+            pools[PooledObjectName.Bullet].Capacity++;
+            return GetNewObject(PooledObjectName.Bullet);
+        }
     }
 
     /// <summary>
@@ -78,7 +100,18 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
     public static GameObject GetEnemy()
     {
         // replace code below with correct code
-        return null;
+
+        if (pools.Count > 0)
+        {
+            prefabEnemy = pools[PooledObjectName.Enemy][pools.Count - 1];
+            pools[PooledObjectName.Enemy].RemoveAt(pools.Count - 1);
+            return prefabEnemy;
+        }
+        else
+        {
+            pools[PooledObjectName.Enemy].Capacity++;
+            return GetNewObject(PooledObjectName.Enemy);
+        }
     }
 
     /// <summary>
@@ -93,18 +126,16 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
         // check for available object in pool
         if (pool.Count > 0)
         {
-            GameObject myobj = pool[pool.Count - 1];
+            GameObject obj = pool[pool.Count - 1];
             pool.RemoveAt(pool.Count - 1);
-            
+            return obj;
             // remove object from pool and return (replace code below)
-            return myobj;
         }
         else
         {
-            Debug.Log("Pool empty"+name);
             pools[name].Capacity++;
+            return GetNewObject(name);
             // pool empty, so expand pool and return new object (replace code below)
-            return GetPooledObject(name);
         }
     }
 
@@ -114,8 +145,11 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
     /// <param name="bullet">bullet</param>
     public static void ReturnBullet(GameObject bullet)
     {
+        bullet.SetActive(false);
+        pools[PooledObjectName.Bullet].Add(bullet);
         // add your code here
     }
+
 
     /// <summary>
     /// Returns an enemy object to the pool
@@ -124,6 +158,9 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
     public static void ReturnEnemy(GameObject enemy)
     {
         // add your code here
+
+        enemy.SetActive(false);
+        pools[PooledObjectName.Enemy].Add(enemy);
     }
 
     /// <summary>
@@ -135,7 +172,8 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
         GameObject obj)
     {
         // add your code here
-
+        obj.SetActive(false);
+        pools[name].Add(obj);
     }
 
     /// <summary>
@@ -157,6 +195,7 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
             enemyCreated.Invoke(obj);
             obj.GetComponent<Enemy>().Initialize();
         }
+
         obj.SetActive(false);
         GameObject.DontDestroyOnLoad(obj);
         return obj;
@@ -168,6 +207,8 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
     public static void EmptyPools()
     {
         // add your code here
+        pools[PooledObjectName.Bullet].Clear();
+        pools[PooledObjectName.Enemy].Clear();
     }
 
     #region Methods to support autograder
@@ -215,7 +256,7 @@ public class ObjectPool : MonoBehaviour, IBulletCreatedInvoker, IEnemyCreatedInv
     /// <returns>current pool capacity</returns>
     public int GetPoolCapacity(PooledObjectName name)
     {
-        if (pools.ContainsKey(name))
+        if (pools[name].Count > 0)
         {
             return pools[name].Capacity;
         }

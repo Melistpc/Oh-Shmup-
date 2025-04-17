@@ -53,7 +53,6 @@ public class Bullet : MonoBehaviour
         // save Rigidbody2D for efficiency
         rb2d = GetComponent<Rigidbody2D>();
         forceVector = new Vector2(GameConstants.BulletImpulseForce, GameConstants.BulletImpulseForce);
-
         // set force vector
         // Caution: you MUST use the bullet impulse force from
         // GameConstants
