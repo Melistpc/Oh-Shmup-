@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using UnityEngine;
 
 /// <summary>
@@ -26,10 +27,7 @@ public class Enemy : MonoBehaviour
     /// this constructor is to support automated grading
     /// </summary>
     /// <param name="gameObject">the game object the script is attached to</param>
-    //public Enemy(GameObject gameObject) :
-    //    base(gameObject)
-    //{
-    //}
+
 
     #endregion
 
@@ -53,15 +51,22 @@ public class Enemy : MonoBehaviour
     public void Initialize()
     {       
         // save Rigidbody2D for efficiency
-      rb2d = GetComponent<Rigidbody2D>();
-      forceVector = ForceVector;
- 
+
+        rb2d = GetComponent<Rigidbody2D>();
+        //forceVector=ForceVector;
+        forceVector = new Vector2(GameConstants.EnemyImpulseForce, 0);
         // set force vector
         // Caution: you MUST use the enemy impulse force from
         // GameConstants
-        shootTimer = new Timer();
-       
+        
+     // shootTimer = new Timer();
         // set up shoot timer
+        //NEW TIMER AÇMA COMPONENT I YOKMUŞ
+        //solution
+        shootTimer=gameObject.AddComponent<Timer>();
+        shootTimer.Duration=GameConstants.EnemyShootDelaySeconds;
+        shootTimer.AddTimerFinishedListener(HandleShootTimerFinished);
+        
 
     }
 
@@ -71,6 +76,7 @@ public class Enemy : MonoBehaviour
     public void Activate()
     {
         // apply impulse force to get enemy moving
+        rb2d.AddForce(forceVector);
 
         shootTimer.Run();
     }
@@ -105,6 +111,13 @@ public class Enemy : MonoBehaviour
         shootTimer.Run();
 
         // shoot bullet
+      Vector3 bulletPos = transform.position;
+        bulletPos.x += GameConstants.EnemyBulletXOffset;
+        bulletPos.y += GameConstants.EnemyBulletYOffset;
+        GameObject bullet = ObjectPool.GetBullet();
+        bullet.transform.position = bulletPos;
+        bullet.SetActive(true);
+        bullet.GetComponent<Bullet>().StartMoving(BulletDirection.Left);
 
     }
 }

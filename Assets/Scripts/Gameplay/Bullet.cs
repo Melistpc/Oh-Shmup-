@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 /// <summary>
@@ -24,11 +25,7 @@ public class Bullet : MonoBehaviour
     /// this constructor is to support automated grading
     /// </summary>
     /// <param name="gameObject">the game object the script is attached to</param>
-    //public Bullet(GameObject gameObject) :
-    //    base(gameObject)
-    //{
-    //}
-
+ 
     #endregion
 
     #region Property for autograder only
@@ -49,14 +46,13 @@ public class Bullet : MonoBehaviour
     /// pool
     /// </summary>
     public void Initialize()
-    {       
+    {
         // save Rigidbody2D for efficiency
-        rb2d = GetComponent<Rigidbody2D>();
-        forceVector = new Vector2(GameConstants.BulletImpulseForce, GameConstants.BulletImpulseForce);
+         rb2d = GetComponent<Rigidbody2D>();
         // set force vector
         // Caution: you MUST use the bullet impulse force from
+        forceVector = new Vector2(GameConstants.BulletImpulseForce, 0);
         // GameConstants
-
     }
 
     /// <summary>
@@ -66,8 +62,15 @@ public class Bullet : MonoBehaviour
     public void StartMoving(BulletDirection direction)
     {
         // apply impulse force to get projectile moving
-         rb2d.velocity= ForceVector*GameConstants.BulletImpulseForce;
-     
+           if (direction == BulletDirection.Left)
+           {
+               forceVector.x=-GameConstants.BulletImpulseForce;
+           }
+           else
+           {
+               forceVector.x=GameConstants.BulletImpulseForce;
+           }
+        rb2d.AddForce(forceVector, ForceMode2D.Impulse);
     }
 
     /// <summary>
@@ -105,9 +108,7 @@ public class Bullet : MonoBehaviour
     void OnBecameInvisible()
     {
         // return to the pool
-        ObjectPool.ReturnBullet(gameObject);
-        gameObject.SetActive(false);
-
+        ObjectPool.ReturnBullet(gameObject); 
     }
 
     /// <summary>
